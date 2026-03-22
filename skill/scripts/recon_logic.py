@@ -228,24 +228,27 @@ def load_bank_rows(bank_path):
     return parse_xlsx(bank_path), None
 
 
-def normalize_gl_amount(raw_amount):
-    return -Decimal(raw_amount)
-
-
 def recon(bank_path, gl_path, output_path, threshold=Decimal('0.00')):
     bank_raw, extracted_xlsx = load_bank_rows(bank_path)
     gl_raw = parse_xlsx(gl_path)
 
     bank_data = [
-        {'id': i, 'date': r[0], 'amount': Decimal(r[1]), 'desc': r[2], 'keys': extract_keys(r[2])}
+        {
+            'id': i,
+            'date': r[0],
+            'amount': Decimal(r[1]),
+            'match_amount': abs(Decimal(r[1])),
+            'desc': r[2],
+            'keys': extract_keys(r[2])
+        }
         for i, r in enumerate(bank_raw[1:]) if len(r) >= 3 and r[1] not in ('', None)
     ]
     gl_data = [
         {
             'id': i,
             'date': r[0],
-            'raw_amount': Decimal(r[1]),
-            'amount': normalize_gl_amount(r[1]),
+            'amount': Decimal(r[1]),
+            'match_amount': abs(Decimal(r[1])),
             'memo': r[2],
             'keys': extract_keys(r[2])
         }
@@ -280,8 +283,8 @@ def recon(bank_path, gl_path, output_path, threshold=Decimal('0.00')):
         if not b_group or not g_group:
             continue
 
-        b_sum = sum(b['amount'] for b in b_group)
-        g_sum = sum(g['amount'] for g in g_group)
+        b_sum = sum(b['match_amount'] for b in b_group)
+        g_sum = sum(g['match_amount'] for g in g_group)
         diff = abs(b_sum - g_sum)
         if diff <= threshold:
             for b in b_group:
@@ -334,7 +337,7 @@ def recon(bank_path, gl_path, output_path, threshold=Decimal('0.00')):
         if not b_list or not g_list:
             continue
 
-        diff = abs(sum(b['amount'] for b in b_list) - sum(g['amount'] for g in g_list))
+        diff = abs(sum(b['match_amount'] for b in b_list) - sum(g['match_amount'] for g in g_list))
         if diff <= threshold:
             for b in b_list:
                 matched_bank_ids.add(b['id'])
