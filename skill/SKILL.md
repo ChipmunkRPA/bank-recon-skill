@@ -42,10 +42,11 @@ When the bank input is a PDF, the script also creates a companion extracted work
 
 Use a layered approach:
 
-1. Match by shared extracted keys such as batch IDs, invoice IDs, vendor IDs, customer IDs, and tax/payment references.
-2. Allow one-to-one, one-to-many, many-to-one, and grouped many-to-many matches when totals fall within threshold.
-3. For remaining items, use semantic name grouping plus summed-amount comparison.
-4. Preserve unmatched rows in dedicated tabs instead of dropping them from the deliverable.
+1. Normalize sign conventions before matching. Treat bank statement inflows as positive and outflows as negative, and invert the GL sign so accounting-style debit/credit polarity compares correctly to the bank activity.
+2. Match by shared extracted keys such as batch IDs, invoice IDs, vendor IDs, customer IDs, and tax/payment references.
+3. Allow one-to-one, one-to-many, many-to-one, and grouped many-to-many matches when totals fall within threshold.
+4. For remaining items, use semantic name grouping plus summed-amount comparison.
+5. Preserve unmatched rows in dedicated tabs instead of dropping them from the deliverable.
 
 ## Notes
 

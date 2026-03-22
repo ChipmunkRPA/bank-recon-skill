@@ -228,6 +228,10 @@ def load_bank_rows(bank_path):
     return parse_xlsx(bank_path), None
 
 
+def normalize_gl_amount(raw_amount):
+    return -Decimal(raw_amount)
+
+
 def recon(bank_path, gl_path, output_path, threshold=Decimal('0.00')):
     bank_raw, extracted_xlsx = load_bank_rows(bank_path)
     gl_raw = parse_xlsx(gl_path)
@@ -237,7 +241,14 @@ def recon(bank_path, gl_path, output_path, threshold=Decimal('0.00')):
         for i, r in enumerate(bank_raw[1:]) if len(r) >= 3 and r[1] not in ('', None)
     ]
     gl_data = [
-        {'id': i, 'date': r[0], 'amount': Decimal(r[1]), 'memo': r[2], 'keys': extract_keys(r[2])}
+        {
+            'id': i,
+            'date': r[0],
+            'raw_amount': Decimal(r[1]),
+            'amount': normalize_gl_amount(r[1]),
+            'memo': r[2],
+            'keys': extract_keys(r[2])
+        }
         for i, r in enumerate(gl_raw[1:]) if len(r) >= 3 and r[1] not in ('', None)
     ]
 
